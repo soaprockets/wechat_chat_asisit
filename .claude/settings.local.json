@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ruff check *)",
+      "Bash(mypy src/ scripts/test_vision_friend.py scripts/run_vision_friend.py)",
+      "Bash(pytest tests/ -q)"
+    ]
+  }
+}

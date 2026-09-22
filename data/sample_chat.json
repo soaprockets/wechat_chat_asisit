@@ -1,0 +1,42 @@
+[
+  {
+    "message_id": "h1",
+    "chat_id": "friend_001",
+    "sender_id": "friend_001",
+    "sender_name": "Alice",
+    "content": "周末有什么安排？",
+    "timestamp": "2026-09-20T10:00:00+00:00",
+    "message_type": "text",
+    "is_group": false
+  },
+  {
+    "message_id": "h2",
+    "chat_id": "friend_001",
+    "sender_id": "me",
+    "sender_name": "我",
+    "content": "还没定呢，哈哈哈",
+    "timestamp": "2026-09-20T10:01:00+00:00",
+    "message_type": "text",
+    "is_group": false
+  },
+  {
+    "message_id": "h3",
+    "chat_id": "friend_001",
+    "sender_id": "friend_001",
+    "sender_name": "Alice",
+    "content": "那一起去吃饭吧",
+    "timestamp": "2026-09-20T10:02:00+00:00",
+    "message_type": "text",
+    "is_group": false
+  },
+  {
+    "message_id": "h4",
+    "chat_id": "friend_001",
+    "sender_id": "me",
+    "sender_name": "我",
+    "content": "可以啊，你想吃啥",
+    "timestamp": "2026-09-20T10:03:00+00:00",
+    "message_type": "text",
+    "is_group": false
+  }
+]

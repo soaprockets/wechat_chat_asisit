@@ -1,0 +1,30 @@
+# Environment variables and secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Runtime caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local data (profiles, chat history, extracted keys)
+data/profiles/
+data/chroma/
+.wechat-mcp/
+all_keys.json
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
