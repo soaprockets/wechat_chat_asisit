@@ -126,6 +126,10 @@ pip install -e ".[vision]"
   --chat-file ~/Downloads/chat_history.json # 或者提供最新的聊天记录截图 \
   --send
   --ticks 0 # 用于实时监控
+```
+
+强烈推荐使用以下指令实现后台实时监控
+```bash
 
 # 如果希望针对一个新的聊天窗口开启自动聊天回复，提供最新的聊天记录截图，运行该指令即可。chat-id要做明显区分
 ./scripts/run_e2e.sh --chat-id "friend_002" --send --ticks 0 --chat-file data/截屏2026-09-23.png
