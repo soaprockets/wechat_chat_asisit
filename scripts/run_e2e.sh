@@ -54,7 +54,7 @@ Optional:
                           (default: WeChat|微信)
   --send                  Enable real auto-send (default is dry-run)
   --ticks <n>             Number of polling ticks (default: 3)
-  --poll-interval <sec>   Seconds between polls (default: 10.0)
+  --poll-interval <sec>   Seconds between polls (default: 30.0)
   --install               Auto pip install -e ".[vision]" if deps missing
   -h, --help              Show this help
 

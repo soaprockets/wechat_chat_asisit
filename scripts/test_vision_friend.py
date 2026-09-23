@@ -111,8 +111,8 @@ def main() -> None:
     parser.add_argument(
         "--poll-interval",
         type=float,
-        default=10.0,
-        help="Seconds between screenshot polls (default: 10.0)",
+        default=30.0,
+        help="Seconds between screenshot polls (default: 30.0)",
     )
     parser.add_argument(
         "--ticks",

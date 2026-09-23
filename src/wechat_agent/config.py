@@ -56,7 +56,7 @@ class Settings(BaseSettings):
     gateway_type: str = Field(default="mock", alias="WECHAT_GATEWAY")  # mock | vision
 
     # Vision gateway settings (used when gateway_type == "vision")
-    vision_poll_interval: float = Field(default=10.0, alias="VISION_POLL_INTERVAL")
+    vision_poll_interval: float = Field(default=30.0, alias="VISION_POLL_INTERVAL")
     vision_window_title_regex: str = Field(
         default="WeChat|微信", alias="VISION_WINDOW_TITLE_REGEX"
     )
