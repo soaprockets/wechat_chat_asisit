@@ -118,13 +118,16 @@ pip install -e ".[vision]"
 ./scripts/run_e2e.sh \
   --chat-id "friend_001" \
   --chat-file ~/Downloads/chat_history.json
+   --ticks 0 # 用于实时监控
 
-# 同一套数据，确认无误后开启真实发送
+# 同一套数据，确认无误后开启真实发送 提供最新的聊天记录截图，然后运行此命令可以实时监测聊天窗口运行，以这个指令为准
 ./scripts/run_e2e.sh \
   --chat-id "friend_001" \
-  --chat-file ~/Downloads/chat_history.json \
+  --chat-file ~/Downloads/chat_history.json # 或者提供最新的聊天记录截图 \
   --send
   --ticks 0 # 用于实时监控
+
+./scripts/run_e2e.sh --chat-id "friend_002" --send --ticks 0 --chat-file data/截屏2026-09-23.png
 ```
 
 #### 5.1 Dry-run 测试（只识别不发送）
@@ -133,7 +136,7 @@ pip install -e ".[vision]"
 python scripts/test_vision_friend.py \
   --chat-id "friend_001" \
   --dry-run \
-  --ticks 3
+  --ticks 0
 ```
 
 #### 5.2 真实自动发送
@@ -142,7 +145,7 @@ python scripts/test_vision_friend.py \
 python scripts/run_vision_friend.py \
   --chat-id "friend_001" \
   --confirm-send \
-  --ticks 3
+  --ticks 0
 ```
 
 - `--chat-id`：`data/profiles/` 中对应画像文件名。脚本会自动从该画像里读取 `friend_name`，用来在截图里匹配具体的聊天标题。
