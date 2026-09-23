@@ -56,14 +56,14 @@ class Settings(BaseSettings):
     gateway_type: str = Field(default="mock", alias="WECHAT_GATEWAY")  # mock | vision
 
     # Vision gateway settings (used when gateway_type == "vision")
-    vision_poll_interval: float = Field(default=2.0, alias="VISION_POLL_INTERVAL")
+    vision_poll_interval: float = Field(default=10.0, alias="VISION_POLL_INTERVAL")
     vision_window_title_regex: str = Field(
         default="WeChat|微信", alias="VISION_WINDOW_TITLE_REGEX"
     )
     vision_targets: str = Field(default="", alias="VISION_TARGETS")
     vision_send_enabled: bool = Field(default=True, alias="VISION_SEND_ENABLED")
     vision_dry_run: bool = Field(default=False, alias="VISION_DRY_RUN")
-    vision_change_threshold: int = Field(default=5, alias="VISION_CHANGE_THRESHOLD")
+    vision_change_threshold: int = Field(default=15, alias="VISION_CHANGE_THRESHOLD")
     vision_image_max_width: int = Field(default=1280, alias="VISION_IMAGE_MAX_WIDTH")
     vision_window_wait_timeout: float = Field(default=30.0, alias="VISION_WINDOW_WAIT_TIMEOUT")
 

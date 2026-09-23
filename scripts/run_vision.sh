@@ -40,7 +40,7 @@ Optional:
                           (default: WeChat|微信)
   --send                  Enable real auto-send (default is dry-run)
   --ticks <n>             Number of polling ticks (default: 3)
-  --poll-interval <sec>   Seconds between polls (default: 2.0)
+  --poll-interval <sec>   Seconds between polls (default: 10.0)
   -h, --help              Show this help
 
 Examples:

@@ -157,7 +157,7 @@ python scripts/run_vision_friend.py \
 - `--window-title`：显式指定**窗口标题正则**，用于 macOS 上定位微信窗口；默认是 `WeChat|微信`，一般不需要再传。
 
 > 说明：`./scripts/run_vision.sh` 和 `./scripts/run_e2e.sh` 不再接受 `--friend-name` 参数。它们会自动从画像里读取并内部传给底层 Python 脚本，用来在截图中匹配聊天标题。macOS 上微信窗口的实际标题通常是 `微信`，所以默认用 `WeChat|微信` 定位窗口；只有窗口标题确实不一样时，才需要用 `--window-title` 覆盖。
-- `--poll-interval`：截图轮询间隔，默认 2.0 秒。
+- `--poll-interval`：截图轮询间隔，默认 10.0 秒。
 - `--ticks`：跑多少轮后自动停止，默认 3 轮；传 `0` 则一直轮询，按 `Ctrl+C` 停止。
 
 #### 5.3 工作机制与调优
@@ -169,8 +169,8 @@ python scripts/run_vision_friend.py \
 相关环境变量（可在 `.env` 中调整）：
 
 ```ini
-VISION_POLL_INTERVAL=2.0          # 轮询间隔
-VISION_CHANGE_THRESHOLD=5         # 画面变化阈值，越小越敏感
+VISION_POLL_INTERVAL=10.0         # 轮询间隔
+VISION_CHANGE_THRESHOLD=15        # 画面变化阈值，越小越敏感
 VISION_WINDOW_WAIT_TIMEOUT=30.0   # 启动后等待微信窗口出现的最大秒数
 VISION_DRY_RUN=false              # true 只识别不发送
 ```
