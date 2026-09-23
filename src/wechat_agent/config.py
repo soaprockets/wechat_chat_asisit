@@ -65,6 +65,7 @@ class Settings(BaseSettings):
     vision_dry_run: bool = Field(default=False, alias="VISION_DRY_RUN")
     vision_change_threshold: int = Field(default=5, alias="VISION_CHANGE_THRESHOLD")
     vision_image_max_width: int = Field(default=1280, alias="VISION_IMAGE_MAX_WIDTH")
+    vision_window_wait_timeout: float = Field(default=30.0, alias="VISION_WINDOW_WAIT_TIMEOUT")
 
     # Logging
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")

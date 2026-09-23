@@ -8,9 +8,10 @@
 #   3. Read the friend/chat title from the generated profile
 #   4. Run the vision gateway (dry-run by default, real send with --send)
 #
-# The friend/chat title used for matching is read automatically from the
-# generated profile (friend_name field). Use --window-title if you need to
-# override the WeChat window title regex.
+# The friend/chat title used for matching messages inside the screenshot is
+# read automatically from the generated profile (friend_name field). The WeChat
+# window itself is matched with the default regex "WeChat|微信"; use
+# --window-title if you need to override it.
 #
 # Usage:
 #   ./scripts/run_e2e.sh \
@@ -50,7 +51,7 @@ Required:
 Optional:
   --chat-file <path>      Chat history file to import before running
   --window-title <regex>  Regex to locate the WeChat window
-                          (default: friend_name from profile)
+                          (default: WeChat|微信)
   --send                  Enable real auto-send (default is dry-run)
   --ticks <n>             Number of polling ticks (default: 3)
   --poll-interval <sec>   Seconds between polls (default: 2.0)
@@ -176,6 +177,15 @@ with open('${PROFILE_PATH}', encoding='utf-8') as f:
     print(json.load(f).get('friend_name', '${CHAT_ID}'))
 PY
     )"
+
+# If the profile's friend_name is just punctuation/symbols (e.g. vision model
+# garbage like "!!!"), fall back to the chat id and let the user override with
+# --window-title if needed.
+if ! "${PYTHON_CMD}" -c "import re, sys; sys.exit(0 if re.search(r'[\\w一-鿿]', sys.argv[1]) else 1)" "${FRIEND_NAME}" 2>/dev/null; then
+    echo "Warning: profile friend_name '${FRIEND_NAME}' looks like garbage, falling back to '${CHAT_ID}'." >&2
+    echo "Use --window-title to specify the real WeChat window title if needed." >&2
+    FRIEND_NAME="${CHAT_ID}"
+fi
 
 echo ""
 echo "==> Profile ready: ${PROFILE_PATH}"

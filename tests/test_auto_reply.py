@@ -1,5 +1,6 @@
 """Tests for the auto reply agent."""
 
+from tests.conftest import FakeLLM
 from wechat_agent.agents.auto_reply import AutoReplyAgent
 from wechat_agent.models.message import WeChatMessage
 from wechat_agent.models.state import AgentState
@@ -27,3 +28,18 @@ def test_prompt_contains_profile_info(fake_llm, sample_profile) -> None:
     state: AgentState = {"message": msg, "profile": sample_profile, "chat_history": []}
     result = agent.generate(state)
     assert result["candidate_reply"] == "好的"
+
+
+def test_empty_reply_returns_error(sample_profile) -> None:
+    agent = AutoReplyAgent(llm=FakeLLM("   "))
+    msg = WeChatMessage(
+        message_id="m1",
+        chat_id="friend_001",
+        sender_id="friend_001",
+        sender_name="Alice",
+        content="hello",
+    )
+    state: AgentState = {"message": msg, "profile": sample_profile, "chat_history": []}
+    result = agent.generate(state)
+    assert result.get("error") == "empty_reply"
+    assert "candidate_reply" not in result

@@ -52,3 +52,17 @@ def test_decide_send_blocks_when_unsafe() -> None:
     result = guard.decide_send(state)
     assert result.get("sent_reply") is None
     assert "blocked" in result.get("error", "")
+
+
+def test_empty_candidate_is_blocked(safety_guard_agent) -> None:
+    msg = WeChatMessage(
+        message_id="m1",
+        chat_id="c1",
+        sender_id="friend",
+        sender_name="Friend",
+        content="hi",
+    )
+    state: AgentState = {"message": msg, "candidate_reply": ""}
+    result = safety_guard_agent.check(state)
+    assert result["safety_result"]["decision"] == "BLOCK"
+    assert "empty" in result["safety_result"]["reason"]

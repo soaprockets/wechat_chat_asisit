@@ -3,9 +3,10 @@
 # Convenience wrapper around scripts/run_vision_friend.py.
 # Defaults to dry-run so it is safe to execute without extra flags.
 #
-# The friend/chat title used for matching is read automatically from the
-# generated profile (friend_name field). Use --window-title if you need to
-# override the WeChat window title regex.
+# The friend/chat title used for matching messages inside the screenshot is
+# read automatically from the generated profile (friend_name field). The WeChat
+# window itself is matched with the default regex "WeChat|微信"; use
+# --window-title if you need to override it.
 #
 # Usage:
 #   ./scripts/run_vision.sh --chat-id "friend_001"
@@ -36,7 +37,7 @@ Required:
 
 Optional:
   --window-title <regex>  Regex to locate the WeChat window
-                          (default: friend_name from profile)
+                          (default: WeChat|微信)
   --send                  Enable real auto-send (default is dry-run)
   --ticks <n>             Number of polling ticks (default: 3)
   --poll-interval <sec>   Seconds between polls (default: 2.0)

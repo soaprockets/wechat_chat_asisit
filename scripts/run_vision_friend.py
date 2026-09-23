@@ -103,7 +103,7 @@ def main() -> None:
     parser.add_argument(
         "--window-title",
         default=None,
-        help="Regex to locate the WeChat window (default: friend name)",
+        help="Regex to locate the WeChat window (default: WeChat|微信)",
     )
     parser.add_argument(
         "--dry-run",
@@ -135,9 +135,10 @@ def main() -> None:
     args = parser.parse_args()
 
     friend_name = _resolve_friend_name(args.chat_id, args.friend_name)
-    # Default window title regex to the friend name so we target the chat window
-    # instead of accidentally matching a settings / backup dialog.
-    window_title = args.window_title or friend_name
+    # macOS WeChat window titles are usually just "微信", not the chat name.
+    # Default to the global WeChat window regex; the extractor will still only
+    # react when the screenshot's chat_title matches the configured friend_name.
+    window_title = args.window_title or settings.vision_window_title_regex
 
     if not args.dry_run and not args.confirm_send:
         print(
@@ -170,6 +171,9 @@ def main() -> None:
         print(f"\n[EXTRACTED] {message.sender_name}: {message.content}")
         state: AgentState = {"message": message}
         final = graph.run(state)
+        if final.get("error"):
+            print(f"[ERROR]     {final['error']}")
+            return
         print(f"[REPLY]     {final.get('candidate_reply')!r}")
         safety = final.get("safety_result") or {}
         print(f"[SAFETY]    {safety.get('decision')} ({safety.get('reason')})")

@@ -51,7 +51,7 @@ LLM_API_TYPE=openai  # openai | anthropic
 | `.json` / `.jsonl` | 消息对象数组 |
 | `.csv` | 必需列：`sender_id`, `sender_name`, `content` |
 | `.pdf` | 导出聊天记录 PDF，由 LLM 自动结构化（需 `[ingestion]`） |
-| `.png/.jpg/.jpeg` | 聊天截图，直接传给多模态 LLM 识别 |
+| `.png/.jpg/.jpeg` | 聊天截图，直接传给多模态 LLM 识别，会自动提取顶部聊天标题作为 `friend_name` |
 
 ```bash
 python scripts/import_chat_history.py friend_001 data/sample_chat.json
@@ -63,6 +63,12 @@ PDF 或截图示例：
 python scripts/import_chat_history.py friend_001 ~/Downloads/chat_export.pdf
 python scripts/import_chat_history.py friend_001 ~/Downloads/wechat_screenshot.png
 ```
+
+> 截图导入时，LLM 会同时识别截图顶部的聊天标题并写入画像的 `friend_name`。如果识别结果有问题（比如乱码或和微信窗口标题不一致），可以手动覆盖：
+>
+> ```bash
+> python scripts/import_chat_history.py friend_001 ~/Downloads/wechat_screenshot.png --friend-name "真实昵称"
+> ```
 
 ### 3. 模拟单轮对话
 
@@ -102,7 +108,7 @@ pip install -e ".[vision]"
 ./scripts/run_vision.sh --chat-id "friend_001"
 
 # 确认无误后再开启真实发送
-./scripts/run_vision.sh --chat-id "friend_001" --send
+./scripts/run_vision.sh --chat-id "friend_001" --send --ticks 0
 ```
 
 如果你连导入聊天记录也不想手动分步执行，可以直接用完整端到端脚本：
@@ -118,6 +124,7 @@ pip install -e ".[vision]"
   --chat-id "friend_001" \
   --chat-file ~/Downloads/chat_history.json \
   --send
+  --ticks 0 # 用于实时监控
 ```
 
 #### 5.1 Dry-run 测试（只识别不发送）
@@ -138,14 +145,31 @@ python scripts/run_vision_friend.py \
   --ticks 3
 ```
 
-- `--chat-id`：`data/profiles/` 中对应画像文件名。脚本会自动从该画像里读取 `friend_name` 作为匹配聊天标题和定位窗口的依据。
-- `--window-title`：显式指定窗口标题正则；默认使用画像中的 `friend_name`，一般不需要再传。
+- `--chat-id`：`data/profiles/` 中对应画像文件名。脚本会自动从该画像里读取 `friend_name`，用来在截图里匹配具体的聊天标题。
+- `--window-title`：显式指定**窗口标题正则**，用于 macOS 上定位微信窗口；默认是 `WeChat|微信`，一般不需要再传。
 
-> 说明：`./scripts/run_vision.sh` 和 `./scripts/run_e2e.sh` 不再接受 `--friend-name` 参数。它们会自动从画像里读取并内部传给底层 Python 脚本，用来在截图中匹配聊天标题。你通常只需要提供 `--chat-id`；只有微信窗口标题和画像里的名字不一致时，才需要用 `--window-title` 覆盖。
+> 说明：`./scripts/run_vision.sh` 和 `./scripts/run_e2e.sh` 不再接受 `--friend-name` 参数。它们会自动从画像里读取并内部传给底层 Python 脚本，用来在截图中匹配聊天标题。macOS 上微信窗口的实际标题通常是 `微信`，所以默认用 `WeChat|微信` 定位窗口；只有窗口标题确实不一样时，才需要用 `--window-title` 覆盖。
 - `--poll-interval`：截图轮询间隔，默认 2.0 秒。
 - `--ticks`：跑多少轮后自动停止，默认 3 轮；传 `0` 则一直轮询，按 `Ctrl+C` 停止。
 
+#### 5.3 工作机制与调优
+
+- **只在检测到新消息时才回复**：每轮截图会先对比画面哈希（dHash）。如果画面变化很小（汉明距离 ≤ `VISION_CHANGE_THRESHOLD`），就跳过本轮，不调用 LLM。
+- **同一条消息不会重复回复**：当画面变化后，VisionGateway 会提取出最新的一条对方消息，并生成 digest。如果这条消息和上一轮处理过的 digest 相同，就说明已经回复过了，直接跳过。
+- **发送回复不会覆盖已见消息 digest**：`_last_seen_digest` 专门记录已处理的好友消息，`_last_sent_digest` 记录自己发出去的回复，二者分开，避免“刚发完回复又把原消息当新消息”的循环。
+
+相关环境变量（可在 `.env` 中调整）：
+
+```ini
+VISION_POLL_INTERVAL=2.0          # 轮询间隔
+VISION_CHANGE_THRESHOLD=5         # 画面变化阈值，越小越敏感
+VISION_WINDOW_WAIT_TIMEOUT=30.0   # 启动后等待微信窗口出现的最大秒数
+VISION_DRY_RUN=false              # true 只识别不发送
+```
+
 发送机制：使用 AppleScript UI scripting（`tell process "WeChat" ... click at {x,y}`）在微信进程内部点击输入框、粘贴、按回车，可绕过 hardened runtime 对全局模拟事件的拦截。
+
+启动后如果微信窗口还没打开，VisionGateway 会最多等待 `VISION_WINDOW_WAIT_TIMEOUT` 秒（默认 30 秒）并每秒重试；超时仍找不到窗口才会报错。环境变量或 `.env` 中可调整该值。
 
 如果提示找不到窗口，先确认微信聊天窗口已打开且可见，再用下面命令查看实际标题：
 

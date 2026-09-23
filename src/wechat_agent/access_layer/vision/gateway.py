@@ -62,15 +62,19 @@ class VisionGateway(BaseGateway):
         self._thread: threading.Thread | None = None
 
         self._last_image_hash: str | None = None
+        # Digest of the last friend message we already reacted to.
         self._last_seen_digest: str = ""
+        # Digest of the last reply we sent (or would have sent in dry-run).
+        self._last_sent_digest: str = ""
 
     def start(self, on_message: Callable[[WeChatMessage], Any]) -> None:
         """Find the WeChat window and start the polling thread."""
         self._handler = on_message
-        self._window = self._backend.find_window(self._settings.vision_window_title_regex)
+        self._window = self._wait_for_window()
         if self._window is None:
             raise RuntimeError(
-                f"No WeChat window matching '{self._settings.vision_window_title_regex}' found"
+                f"No WeChat window matching '{self._settings.vision_window_title_regex}' found "
+                f"after {self._settings.vision_window_wait_timeout:.1f}s"
             )
         logger.info(
             "vision_gateway_started",
@@ -80,6 +84,29 @@ class VisionGateway(BaseGateway):
         self._stop_event.clear()
         self._thread = threading.Thread(target=self._run_loop, daemon=True)
         self._thread.start()
+
+    def _wait_for_window(self) -> WindowInfo | None:
+        """Wait until the configured WeChat window appears.
+
+        Returns the window info as soon as it is found, or None if the timeout
+        expires. This gives users a chance to open the chat window after
+        launching the agent.
+        """
+        deadline = time.monotonic() + self._settings.vision_window_wait_timeout
+        while True:
+            window = self._backend.find_window(self._settings.vision_window_title_regex)
+            if window is not None:
+                return window
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                break
+            logger.info(
+                "vision_window_not_found_yet",
+                title_regex=self._settings.vision_window_title_regex,
+                retry_in=min(1.0, remaining),
+            )
+            time.sleep(min(1.0, remaining))
+        return None
 
     def _run_loop(self) -> None:
         """Polling loop."""
@@ -152,7 +179,7 @@ class VisionGateway(BaseGateway):
                 dry_run=self._settings.vision_dry_run,
             )
             with self._lock:
-                self._last_seen_digest = f"{chat_id}:me:{content}"
+                self._last_sent_digest = f"{chat_id}:me:{content}"
             return True
 
         with self._lock:
@@ -160,7 +187,7 @@ class VisionGateway(BaseGateway):
                 return False
             result = self._backend.send_text(self._window, content)
             if result:
-                self._last_seen_digest = f"{chat_id}:me:{content}"
+                self._last_sent_digest = f"{chat_id}:me:{content}"
             return result
 
     def stop(self) -> None:
@@ -172,9 +199,9 @@ class VisionGateway(BaseGateway):
 
     @staticmethod
     def _newest_friend_message(extracted: ExtractedChat) -> ExtractedMessage | None:
-        """Return the latest message not sent by me, if any."""
+        """Return the latest non-empty message not sent by me, if any."""
         for msg in reversed(extracted.messages):
-            if msg.sender_id != "me":
+            if msg.sender_id != "me" and msg.content.strip():
                 return msg
         return None
 

@@ -6,9 +6,9 @@ from typing import Any
 
 import pytest
 
+from tests.conftest import FakeLLM
 from wechat_agent.ingestion import ChatHistoryImporter, get_parser
 from wechat_agent.ingestion.parsers import ImageParser
-from tests.conftest import FakeLLM
 
 
 @pytest.fixture

@@ -57,8 +57,12 @@ class AutoReplyAgent:
         prompt = self._build_prompt(message.content, profile, history)
         try:
             reply = self._llm.generate(prompt, system=DEFAULT_SYSTEM_PROMPT, temperature=0.7)
+            reply = reply.strip()
+            if not reply:
+                logger.warning("empty_reply_generated", chat_id=message.chat_id)
+                return {**state, "error": "empty_reply"}
             logger.debug("reply_generated", chat_id=message.chat_id, reply=reply)
-            return {**state, "candidate_reply": reply.strip()}
+            return {**state, "candidate_reply": reply}
         except Exception as exc:  # noqa: BLE001
             logger.error("reply_generation_failed", chat_id=message.chat_id, error=str(exc))
             return {**state, "error": f"reply_generation_failed: {exc}"}

@@ -41,7 +41,9 @@ class SafetyGuardAgent:
         """Run safety checks on the candidate reply."""
         candidate = state.get("candidate_reply")
         if not candidate:
-            return {**state, "error": "no_candidate_reply"}
+            result = {"decision": "BLOCK", "reason": "empty candidate reply"}
+            logger.warning("safety_blocked_empty_candidate")
+            return {**state, "safety_result": result}
 
         # 1. Keyword check
         blocked_keyword = self._match_keyword(candidate)
